@@ -1,0 +1,125 @@
+.sheet {
+  display: grid;
+  gap: var(--s-3);
+}
+
+.title {
+  font-size: var(--text-lg);
+  font-stretch: 112%;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+}
+
+.title:not(:first-child) {
+  margin-top: var(--s-4);
+}
+
+.strip {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-4) var(--s-3);
+}
+
+.frame {
+  display: grid;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  color: inherit;
+}
+
+.rebate {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-stretch: 80%;
+  color: #7d470f;
+}
+
+.markWrap {
+  display: block;
+  width: 100%;
+}
+
+/* A contact print: the image inside the film's black rebate. */
+.print {
+  display: block;
+  width: 100%;
+  aspect-ratio: 8 / 5;
+  padding: 4px;
+  background: var(--paper-ink);
+  overflow: hidden;
+}
+
+.print img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: filter var(--t-med) var(--ease-out);
+}
+
+.frame:hover .print img {
+  filter: brightness(1.15) contrast(1.05);
+}
+
+.developing {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(100deg, #1b1512 30%, #2c231d 50%, #1b1512 70%) 0 0 / 300% 100%;
+  animation: develop 1.6s linear infinite;
+}
+
+@keyframes develop {
+  to {
+    background-position: -150% 0;
+  }
+}
+
+.name {
+  font-size: var(--text-sm);
+  font-stretch: 85%;
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.empty {
+  max-width: 46ch;
+  font-size: var(--text-md);
+  color: var(--paper-ink-dim);
+}
+
+.kept {
+  position: relative;
+}
+
+.forget {
+  position: absolute;
+  top: 14px;
+  right: -6px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: 0 1px 3px rgb(0 0 0 / 30%);
+  opacity: 0;
+  transition: opacity var(--t-fast) var(--ease-out);
+}
+
+.kept:hover .forget,
+.forget:focus-visible {
+  opacity: 1;
+}
+
+@media (max-width: 560px) {
+  .strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

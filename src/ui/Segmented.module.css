@@ -1,0 +1,37 @@
+.field {
+  display: grid;
+  gap: var(--s-2);
+  padding: 6px 0;
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-stretch: 78%;
+  font-weight: 560;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-dark-dim);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-1) var(--s-4);
+}
+
+.option {
+  padding: 4px 0 6px;
+  font-size: var(--text-md);
+  font-stretch: 88%;
+  font-weight: 500;
+  color: var(--on-dark-dim);
+  transition: color var(--t-fast) var(--ease-out);
+}
+
+.option:hover {
+  color: var(--on-dark);
+}
+
+.option[aria-checked='true'] {
+  color: var(--on-dark);
+}

@@ -1,0 +1,88 @@
+.row {
+  display: grid;
+  gap: 2px;
+  padding: 6px 0;
+}
+
+.row[data-disabled] {
+  opacity: 0.4;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--s-3);
+}
+
+.label {
+  font-size: var(--text-sm);
+  font-stretch: 78%;
+  font-weight: 560;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-dark-dim);
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-stretch: 85%;
+  font-variant-numeric: tabular-nums;
+  color: var(--on-dark);
+}
+
+.unit {
+  margin-left: 2px;
+  color: var(--on-dark-faint);
+}
+
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 22px;
+  touch-action: none;
+  user-select: none;
+  cursor: ew-resize;
+}
+
+/* Graduations: a major tick every tenth, a minor one every fiftieth, on a hairline base. */
+.track {
+  position: relative;
+  flex: 1;
+  height: 9px;
+  background:
+    linear-gradient(var(--dark-line-strong), var(--dark-line-strong)) bottom / 100% 1px no-repeat,
+    repeating-linear-gradient(90deg, var(--dark-line-strong) 0 1px, transparent 1px 10%) bottom / 100% 9px
+      no-repeat,
+    repeating-linear-gradient(90deg, var(--dark-line) 0 1px, transparent 1px 2%) bottom / 100% 4px no-repeat;
+}
+
+.range {
+  position: absolute;
+  bottom: 0;
+  height: 1px;
+  background: var(--on-dark);
+}
+
+/* The index needle. A paper cap above a red line, so it reads against both the dark and the ticks. */
+.thumb {
+  display: block;
+  width: 14px;
+  height: 22px;
+  background:
+    linear-gradient(var(--safelight-text), var(--safelight-text)) center 5px / 2px 17px no-repeat,
+    radial-gradient(circle at 50% 4px, var(--paper) 0 3.5px, transparent 4px);
+  transition: transform var(--t-fast) var(--ease-out);
+}
+
+.thumb:hover,
+.root:active .thumb {
+  transform: scaleY(1.12);
+}
+
+.thumb:focus-visible {
+  outline: 2px solid var(--marker);
+  outline-offset: 3px;
+}

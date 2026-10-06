@@ -1,0 +1,21 @@
+node_modules/
+dist/
+*.local
+*.tsbuildinfo
+.cache/
+
+# verification output
+captures/
+test-results/
+playwright-report/
+
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+*.log
+
+# design-review scratch (screenshots, decision pages); the surface brief stays tracked
+.impeccable/review/
+.impeccable/questions/
+.impeccable/mocks/
+.impeccable/build/

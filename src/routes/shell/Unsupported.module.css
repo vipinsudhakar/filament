@@ -1,0 +1,76 @@
+.page {
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  align-items: center;
+  gap: var(--s-8);
+  padding: var(--s-7) clamp(var(--s-4), 6vw, var(--s-9));
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+/* A print on the paper: the image inside a white border, the way it comes off the easel. */
+.print {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.print video {
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  background: var(--dark-0);
+  border: 14px solid #f8f4ec;
+  box-shadow: 0 24px 50px -24px rgb(23 17 13 / 55%);
+}
+
+.print figcaption {
+  font-size: var(--text-xs);
+  font-stretch: 85%;
+  letter-spacing: 0.04em;
+  color: var(--paper-ink-dim);
+}
+
+.copy {
+  display: grid;
+  gap: var(--s-4);
+  max-width: 44ch;
+}
+
+.copy h1 {
+  font-size: clamp(28px, 3.6vw, 48px);
+  font-stretch: 108%;
+  font-weight: 800;
+  line-height: 1.02;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.copy p {
+  font-size: var(--text-lg);
+  line-height: 1.5;
+  color: var(--paper-ink-dim);
+}
+
+.copy pre {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  white-space: pre-wrap;
+  color: #8f2412;
+}
+
+.back {
+  justify-self: start;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 760px) {
+  .page {
+    grid-template-columns: 1fr;
+    gap: var(--s-6);
+    align-content: center;
+  }
+}

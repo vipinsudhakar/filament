@@ -1,0 +1,688 @@
+.page {
+  background: var(--dark-0);
+}
+
+/* ─── Hero ─────────────────────────────────────────────────────────────────── */
+
+.hero {
+  position: relative;
+  height: 100svh;
+  min-height: 560px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.heroCanvasWrap {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.heroCanvas {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 40%;
+}
+
+/* The safelight wipe between frames: red light sweeping across the print, multiplied into it. */
+.wipe {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, var(--safelight) 18%, var(--safelight) 82%, transparent);
+  mix-blend-mode: multiply;
+  opacity: 0;
+  clip-path: inset(0 100% 0 0);
+}
+
+.wipe[data-active] {
+  animation: wipe 1100ms var(--ease-in-out) forwards;
+}
+
+@keyframes wipe {
+  0% {
+    opacity: 1;
+    clip-path: inset(0 100% 0 0);
+  }
+  45% {
+    opacity: 1;
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    opacity: 1;
+    clip-path: inset(0 0 0 100%);
+  }
+}
+
+/* The film rebate along the top edge: sprocket holes, edge-printed frame codes, the way in. */
+.rebate {
+  position: absolute;
+  z-index: 3;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--s-5);
+  height: 44px;
+  padding: 0 var(--s-5);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='44'%3E%3Crect x='8' y='5' width='10' height='7' rx='1.6' fill='%230b0908'/%3E%3Crect x='8' y='32' width='10' height='7' rx='1.6' fill='%230b0908'/%3E%3C/svg%3E")
+      repeat-x,
+    color-mix(in srgb, var(--dark-1) 82%, transparent);
+  color: var(--edge);
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-stretch: 82%;
+  letter-spacing: 0.04em;
+}
+
+.rebateBrand {
+  font-family: var(--font-display);
+  font-size: var(--text-sm);
+  font-stretch: 125%;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--on-dark);
+  padding: 2px 8px;
+  background: var(--dark-1);
+}
+
+.rebateFrames {
+  list-style: none;
+  display: flex;
+  gap: var(--s-1);
+  flex: 1;
+  justify-content: center;
+}
+
+.rebateFrame {
+  display: inline-flex;
+  gap: 5px;
+  padding: 3px 8px;
+  background: var(--dark-1);
+  color: inherit;
+  opacity: 0.6;
+  transition:
+    opacity var(--t-fast) var(--ease-out),
+    color var(--t-fast) var(--ease-out);
+}
+
+.rebateFrame:hover {
+  opacity: 1;
+}
+
+.rebateFrame[aria-current] {
+  opacity: 1;
+  color: var(--safelight-text);
+}
+
+.rebateNav {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-family: var(--font-display);
+}
+
+.rebateNav a {
+  display: inline-flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  background: var(--dark-1);
+  color: var(--on-dark);
+  font-size: var(--text-sm);
+  font-stretch: 85%;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  transition: color var(--t-fast) var(--ease-out);
+}
+
+.rebateNav a:hover {
+  color: var(--marker);
+}
+
+/* The name, set as a negative: the letters invert whatever the print is doing beneath them. */
+.wordmark {
+  position: absolute;
+  z-index: 2;
+  left: 0;
+  right: 0;
+  bottom: clamp(88px, 13vh, 140px);
+  display: flex;
+  justify-content: center;
+  font-size: clamp(36px, 15.2vw, 260px);
+  font-stretch: 125%;
+  font-weight: 800;
+  line-height: 0.8;
+  letter-spacing: -0.035em;
+  color: var(--paper);
+  mix-blend-mode: difference;
+  pointer-events: none;
+  user-select: none;
+}
+
+.wordmark span {
+  display: inline-block;
+}
+
+.heroBottom {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: var(--s-5);
+  padding: var(--s-7) var(--s-5) var(--s-5);
+}
+
+/* The lower half of the print falls into shadow: the readouts and the line can be read, and the
+   negative wordmark inverts a darker field, so it stays close to paper white on even the busiest run. */
+.hero::after {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 52%;
+  background: linear-gradient(to top, rgb(11 9 8 / 90%), rgb(11 9 8 / 62%) 40%, rgb(11 9 8 / 30%) 70%, transparent);
+  pointer-events: none;
+}
+
+.timer {
+  display: grid;
+  gap: 4px;
+  justify-self: start;
+}
+
+.timerName {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  font-size: var(--text-md);
+  font-stretch: 85%;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--on-dark);
+}
+
+.timerCode {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 400;
+  color: var(--edge);
+}
+
+.timerRead {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-md);
+  font-stretch: 88%;
+  font-variant-numeric: tabular-nums;
+  color: var(--on-dark);
+}
+
+.timerLabel {
+  font-family: var(--font-display);
+  font-size: 10px;
+  font-stretch: 78%;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--safelight-text);
+}
+
+.timerLabel:not(:first-child) {
+  margin-left: var(--s-2);
+}
+
+.tagline {
+  max-width: 34ch;
+  text-align: center;
+  font-size: var(--text-md);
+  line-height: 1.45;
+  color: var(--on-dark-dim);
+  text-wrap: balance;
+}
+
+.cta {
+  justify-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-3);
+  height: 52px;
+  padding: 0 var(--s-5) 0 var(--s-6);
+  border-radius: var(--radius-pill);
+  background: var(--safelight);
+  color: var(--paper);
+  font-size: var(--text-md);
+  font-stretch: 88%;
+  font-weight: 750;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  text-decoration: none;
+  box-shadow: 0 10px 40px -8px rgb(192 48 28 / 55%);
+  transition:
+    background-color var(--t-fast) var(--ease-out),
+    gap var(--t-med) var(--ease-out),
+    box-shadow var(--t-med) var(--ease-out);
+}
+
+.cta:hover {
+  background: #d2381f;
+  gap: var(--s-4);
+  box-shadow: 0 14px 50px -6px rgb(192 48 28 / 70%);
+}
+
+/* ─── Contact sheet ────────────────────────────────────────────────────────── */
+
+.sheet {
+  position: relative;
+  z-index: 1;
+  padding: var(--s-9) clamp(var(--s-4), 5vw, var(--s-8)) var(--s-9);
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+.sheetHead {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 30ch);
+  align-items: end;
+  gap: var(--s-6);
+  margin-bottom: var(--s-7);
+}
+
+.sheetTitle {
+  font-size: clamp(48px, 8.4vw, 136px);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  overflow: hidden;
+}
+
+.sheetTitle span {
+  display: inline-block;
+}
+
+.sheetNote {
+  font-size: var(--text-lg);
+  line-height: 1.45;
+  color: var(--paper-ink-dim);
+  text-wrap: pretty;
+}
+
+.strips {
+  display: grid;
+  gap: var(--s-6);
+}
+
+/* A strip of film: black base, sprocket rows above and below, four frames between. */
+.strip {
+  background: var(--paper-ink);
+  padding: 0 var(--s-3);
+  box-shadow: 0 18px 36px -24px rgb(23 17 13 / 70%);
+}
+
+.strip:nth-child(2) {
+  transform: translateX(clamp(8px, 2vw, 32px)) rotate(-0.35deg);
+}
+
+.sprockets {
+  height: 22px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='22'%3E%3Crect x='7' y='7' width='10' height='8' rx='1.8' fill='%23ebe4d4'/%3E%3C/svg%3E")
+    repeat-x center;
+}
+
+.frames {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--s-3);
+}
+
+.frame {
+  display: grid;
+  gap: 4px;
+  color: var(--edge);
+  text-decoration: none;
+}
+
+.frameEdge {
+  display: flex;
+  gap: var(--s-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-stretch: 82%;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.frameMark {
+  display: block;
+  width: 100%;
+}
+
+.frameImage {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  overflow: hidden;
+  border-radius: 2px;
+}
+
+.frameCanvas {
+  width: 100%;
+  height: 100%;
+  transition: transform var(--t-slow) var(--ease-develop);
+}
+
+.frame:hover .frameCanvas {
+  transform: scale(1.04);
+}
+
+/* ─── Test strip ───────────────────────────────────────────────────────────── */
+
+.test {
+  padding: var(--s-9) clamp(var(--s-4), 5vw, var(--s-8));
+  background: var(--dark-0);
+}
+
+.testTitle {
+  max-width: 16ch;
+  margin-bottom: var(--s-7);
+  font-size: clamp(48px, 8.4vw, 136px);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.86;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  text-wrap: balance;
+}
+
+.testStrip {
+  position: relative;
+  height: clamp(420px, 72vh, 760px);
+  overflow: hidden;
+  border: 10px solid #f8f4ec;
+  box-shadow: 0 30px 60px -30px rgb(0 0 0 / 80%);
+}
+
+.testCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.bands {
+  position: absolute;
+  inset: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+/* Each band is a different exposure of the same print — the darkroom's way of choosing a time. */
+.band {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: var(--s-4);
+  backdrop-filter: brightness(var(--exposure, 1)) contrast(1.08);
+  border-left: 1px solid rgb(235 228 212 / 22%);
+}
+
+.band:first-child {
+  border-left: 0;
+}
+
+.bandTime {
+  align-self: flex-start;
+  padding: 2px 8px;
+  background: rgb(11 9 8 / 70%);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-stretch: 82%;
+  color: var(--edge);
+}
+
+.bandCopy {
+  display: grid;
+  gap: var(--s-1);
+  padding: var(--s-3);
+  background: rgb(11 9 8 / 78%);
+}
+
+.bandCopy h3 {
+  font-size: clamp(22px, 2.4vw, 36px);
+  font-stretch: 120%;
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.bandCopy p {
+  font-size: var(--text-md);
+  line-height: 1.4;
+  color: var(--on-dark-dim);
+}
+
+/* ─── Close ────────────────────────────────────────────────────────────────── */
+
+.close {
+  padding: var(--s-9) clamp(var(--s-4), 5vw, var(--s-8)) var(--s-5);
+  background: var(--dark-0);
+}
+
+.closeTitle {
+  font-size: clamp(72px, 15vw, 260px);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.85;
+  letter-spacing: -0.015em;
+  text-transform: uppercase;
+}
+
+.closeLine {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.06em;
+}
+
+.closeLine span {
+  display: inline-block;
+}
+
+.closeRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--s-5);
+  margin: var(--s-7) 0 var(--s-9);
+}
+
+.closeRow .cta {
+  justify-self: auto;
+}
+
+.closeNote {
+  font-size: var(--text-md);
+  color: var(--on-dark-dim);
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--s-3) var(--s-5);
+  padding-top: var(--s-4);
+  border-top: 1px solid var(--dark-line);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-stretch: 82%;
+  color: var(--on-dark-dim);
+}
+
+.footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--on-dark-dim);
+  text-decoration: none;
+}
+
+.footer a:hover {
+  color: var(--marker);
+}
+
+/* ─── Small screens ────────────────────────────────────────────────────────── */
+
+@media (max-width: 900px) {
+  .heroBottom {
+    grid-template-columns: 1fr auto;
+  }
+  .tagline {
+    display: none;
+  }
+  .rebateFrames {
+    display: none;
+  }
+  .rebate {
+    justify-content: space-between;
+  }
+  .frames {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .sheetHead {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
+}
+
+@media (max-width: 640px) {
+  .heroBottom {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+    padding: var(--s-4);
+  }
+  .cta {
+    justify-self: stretch;
+    justify-content: space-between;
+  }
+  .wordmark {
+    bottom: 168px;
+  }
+  .bands {
+    grid-template-columns: 1fr;
+    grid-template-rows: repeat(4, 1fr);
+  }
+  .band {
+    flex-direction: row;
+    align-items: center;
+    border-left: 0;
+    border-top: 1px solid rgb(235 228 212 / 22%);
+  }
+  .band:first-child {
+    border-top: 0;
+  }
+  .bandCopy {
+    padding: var(--s-2) var(--s-3);
+  }
+  .testStrip {
+    height: 640px;
+  }
+  .strip:nth-child(2) {
+    transform: none;
+  }
+}
+
+/* ─── Feed it ──────────────────────────────────────────────────────────────── */
+
+.feed {
+  padding: var(--s-8) clamp(var(--s-4), 5vw, var(--s-8)) var(--s-9);
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+
+.feedHead {
+  display: grid;
+  grid-template-columns: 1fr minmax(0, 32ch);
+  align-items: end;
+  gap: var(--s-6);
+  margin-bottom: var(--s-6);
+}
+
+.feedTitle {
+  font-size: clamp(48px, 8.4vw, 136px);
+  font-stretch: 62%;
+  font-weight: 800;
+  line-height: 0.86;
+  text-transform: uppercase;
+}
+
+.feedNote {
+  font-size: var(--text-lg);
+  line-height: 1.45;
+  color: var(--paper-ink-dim);
+  text-wrap: pretty;
+}
+
+/* A print just off the easel: the image held in its white border, lying a touch askew on the paper. */
+.feedPrint {
+  position: relative;
+  height: clamp(380px, 64vh, 680px);
+  border: clamp(12px, 1.6vw, 22px) solid #f8f4ec;
+  box-shadow:
+    0 2px 3px rgb(23 17 13 / 18%),
+    0 30px 60px -28px rgb(23 17 13 / 60%);
+  transform: rotate(0.4deg);
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.feedCanvas {
+  width: 100%;
+  height: 100%;
+}
+
+.feedReset {
+  position: absolute;
+  right: var(--s-3);
+  bottom: var(--s-3);
+  height: 32px;
+  padding: 0 var(--s-4);
+  border-radius: var(--radius-pill);
+  background: rgb(11 9 8 / 70%);
+  color: var(--on-dark);
+  font-size: var(--text-xs);
+  font-stretch: 82%;
+  font-weight: 650;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  transition: background-color var(--t-fast) var(--ease-out);
+}
+
+.feedReset:hover {
+  background: rgb(11 9 8 / 92%);
+}
+
+@media (max-width: 900px) {
+  .feedHead {
+    grid-template-columns: 1fr;
+    gap: var(--s-4);
+  }
+}

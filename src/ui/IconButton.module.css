@@ -1,0 +1,106 @@
+.button {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  min-width: 36px;
+  height: 36px;
+  padding: 0 var(--s-2);
+  border-radius: var(--radius-s);
+  color: var(--on-dark-dim);
+  transition:
+    color var(--t-fast) var(--ease-out),
+    background-color var(--t-fast) var(--ease-out);
+}
+
+.button:hover:not(:disabled) {
+  color: var(--on-dark);
+  background: var(--dark-2);
+}
+
+.button:active:not(:disabled) {
+  background: var(--dark-3);
+}
+
+.button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.button[data-tone='live'] {
+  color: var(--safelight-text);
+}
+
+.labelled {
+  padding: 0 var(--s-3) 0 var(--s-2);
+}
+
+.icon {
+  display: inline-flex;
+}
+
+.icon svg {
+  width: 18px;
+  height: 18px;
+  stroke-width: 1.6;
+}
+
+.text {
+  font-size: var(--text-sm);
+  font-stretch: 82%;
+  font-weight: 560;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Tooltip: edge-print caps on a dark tab, after a short delay so it never flickers on pass-through. */
+.button[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  z-index: 50;
+  white-space: nowrap;
+  padding: 5px 8px;
+  border-radius: var(--radius-s);
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-size: var(--text-xs);
+  font-stretch: 80%;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition:
+    opacity var(--t-fast) var(--ease-out),
+    transform var(--t-fast) var(--ease-out);
+}
+
+.button[data-tip]:hover::after,
+.button[data-tip]:focus-visible::after {
+  opacity: 1;
+  transform: none;
+  transition-delay: 380ms;
+}
+
+.button[data-tip-side='bottom']::after {
+  top: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+}
+.button[data-tip-side='top']::after {
+  bottom: calc(100% + 8px);
+  left: 50%;
+  translate: -50% 0;
+}
+.button[data-tip-side='right']::after {
+  left: calc(100% + 10px);
+  top: 50%;
+  translate: 0 -50%;
+}
+.button[data-tip-side='left']::after {
+  right: calc(100% + 10px);
+  top: 50%;
+  translate: 0 -50%;
+}

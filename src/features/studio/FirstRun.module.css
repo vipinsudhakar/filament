@@ -1,0 +1,75 @@
+/* Handwriting would be a costume; the note is set in the brand face, and only the arrow is drawn. */
+.note {
+  position: absolute;
+  left: 104px;
+  top: calc(50% - 150px);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s-2);
+  pointer-events: none;
+  color: var(--marker);
+  animation: note-in 700ms var(--ease-develop) 1.2s both;
+}
+
+.note p {
+  margin-top: 30px;
+  font-size: var(--text-lg);
+  font-stretch: 92%;
+  font-weight: 650;
+  line-height: 1.25;
+  padding: 6px 10px;
+  background: rgb(11 9 8 / 86%);
+  border-radius: var(--radius-s);
+}
+
+.arrow {
+  width: 90px;
+  height: 60px;
+  overflow: visible;
+  filter: url(#china-marker);
+}
+
+.arrow path {
+  fill: none;
+  stroke: var(--marker);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 700ms var(--ease-out) 1.4s forwards;
+}
+
+.arrow path + path {
+  animation-delay: 2s;
+}
+
+/* The arrow points left at the rail, so it's drawn mirrored from its natural direction. */
+.arrow {
+  transform: scaleX(-1);
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes note-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (max-width: 760px) {
+  .note {
+    left: 50%;
+    top: auto;
+    bottom: 150px;
+    translate: -50% 0;
+  }
+  .arrow {
+    display: none;
+  }
+}

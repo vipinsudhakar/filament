@@ -1,0 +1,150 @@
+.panel {
+  position: absolute;
+  top: 68px;
+  right: var(--s-3);
+  bottom: 80px;
+  width: 308px;
+  display: flex;
+  flex-direction: column;
+  background: var(--dark-1);
+  border: var(--panel-edge);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  opacity: 0;
+  transform: translateX(16px);
+  pointer-events: none;
+  visibility: hidden;
+  transition:
+    opacity var(--t-med) var(--ease-out),
+    transform var(--t-med) var(--ease-out),
+    visibility 0s linear var(--t-med);
+}
+
+.panel[data-open] {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  visibility: visible;
+  transition:
+    opacity var(--t-med) var(--ease-out),
+    transform var(--t-med) var(--ease-out);
+}
+
+.tabs {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--s-3) var(--s-2) var(--s-2) var(--s-4);
+  border-bottom: 1px solid var(--dark-line);
+}
+
+.list {
+  display: flex;
+  gap: var(--s-3);
+}
+
+.trigger {
+  padding: 6px 0 8px;
+  font-size: var(--text-sm);
+  font-stretch: 82%;
+  font-weight: 650;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--on-dark-dim);
+  transition: color var(--t-fast) var(--ease-out);
+}
+
+.trigger:hover,
+.trigger[data-state='active'] {
+  color: var(--on-dark);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  color: var(--on-dark-dim);
+}
+
+.close:hover {
+  background: var(--dark-2);
+  color: var(--on-dark);
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.content {
+  padding: var(--s-3) var(--s-4) var(--s-5);
+}
+
+.content[data-state='active'] {
+  animation: develop-in 380ms var(--ease-develop);
+}
+
+@keyframes develop-in {
+  from {
+    opacity: 0;
+    filter: brightness(0.3);
+  }
+}
+
+@media (max-width: 760px) {
+  .panel {
+    top: auto;
+    left: var(--s-2);
+    right: var(--s-2);
+    bottom: var(--s-2);
+    width: auto;
+    height: min(62svh, 520px);
+    border-radius: var(--radius-s);
+    transform: translateY(24px);
+    z-index: 5;
+  }
+  .list {
+    gap: var(--s-2);
+    overflow-x: auto;
+  }
+}
+
+/* Film rebate across the top of the panel: sprocket holes with the frame's edge printing between. */
+.rebate {
+  flex: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--s-3);
+  height: 26px;
+  padding: 0 var(--s-4);
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='26'%3E%3Crect x='7' y='3' width='8' height='5' rx='1.4' fill='%230b0908'/%3E%3Crect x='7' y='18' width='8' height='5' rx='1.4' fill='%230b0908'/%3E%3C/svg%3E")
+      repeat-x,
+    var(--dark-3);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-stretch: 80%;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--edge);
+}
+
+.rebate span {
+  padding: 0 4px;
+  background: var(--dark-3);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}

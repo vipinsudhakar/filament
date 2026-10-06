@@ -1,0 +1,59 @@
+.wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.mark {
+  position: absolute;
+  pointer-events: none;
+  overflow: visible;
+  filter: url(#china-marker);
+}
+
+.mark path {
+  fill: none;
+  stroke: var(--marker);
+  stroke-width: 2.4px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  transition:
+    stroke-dashoffset 520ms var(--ease-out),
+    opacity 120ms linear;
+}
+
+.mark[data-active='true'] path {
+  stroke-dashoffset: 0;
+  opacity: 1;
+}
+
+/* Lifting the marker off is quicker than drawing it on. */
+.mark[data-active='false'] path {
+  transition:
+    stroke-dashoffset 200ms var(--ease-in-out),
+    opacity 200ms linear 80ms;
+}
+
+.loop {
+  inset: -7px -9px;
+  width: calc(100% + 18px);
+  height: calc(100% + 14px);
+}
+
+.underline {
+  left: -3px;
+  right: -3px;
+  bottom: -9px;
+  width: calc(100% + 6px);
+  height: 10px;
+}
+
+.tick {
+  right: -18px;
+  top: -6px;
+  width: 16px;
+  height: 16px;
+}

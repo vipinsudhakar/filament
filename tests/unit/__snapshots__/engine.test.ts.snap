@@ -1,0 +1,9 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`rng > matches the pinned reference values 1`] = `
+[
+  129708002,
+  2831084092,
+  3861530882,
+]
+`;

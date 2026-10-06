@@ -1,0 +1,74 @@
+/*
+ * Design tokens: the only place raw colour, type and motion values live.
+ *
+ * The world is a darkroom. Two grounds — darkroom black and fibre paper — and two marks: the
+ * safelight (red, live state) and the china marker (yellow, the hand's selection). The organism's
+ * own colours are content, not chrome, so none of them appear here.
+ */
+:root {
+  /* Darkroom */
+  --dark-0: #0b0908;
+  --dark-1: #14100e;
+  --dark-2: #1d1714;
+  --dark-3: #2a221d;
+  --dark-line: rgb(235 228 212 / 11%);
+  --dark-line-strong: rgb(235 228 212 / 22%);
+
+  /* Fibre paper, and the ink that sits on it */
+  --paper: #ebe4d4;
+  --paper-shade: #ddd4c1;
+  --paper-ink: #17110d;
+  --paper-ink-dim: #5c5248;
+  --paper-line: rgb(23 17 13 / 14%);
+
+  /* Paper-white type on the dark, at the three strengths the chrome uses */
+  --on-dark: #ebe4d4;
+  --on-dark-dim: #a49c8f;
+  --on-dark-faint: #6f685e;
+
+  /* Safelight: live state — recording, the active exposure, the one action */
+  --safelight: #c0301c;
+  --safelight-text: #ec5b43;
+  --safelight-wash: rgb(192 48 28 / 55%);
+
+  /* China marker: the hand that circles what's chosen */
+  --marker: #f4cf3e;
+
+  /* Film-edge printing on the rebate */
+  --edge: #e39a3b;
+
+  --font-display: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --font-mono: 'Martian Mono Variable', 'Martian Mono', ui-monospace, monospace;
+
+  /* One 4px measure under everything; spacing steps are multiples of it. */
+  --u: 4px;
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+  --s-8: 72px;
+  --s-9: 120px;
+
+  --text-xs: 11px;
+  --text-sm: 12px;
+  --text-md: 14px;
+  --text-lg: 17px;
+  --text-xl: 24px;
+
+  --radius-pill: 999px;
+  --radius-s: 3px;
+
+  /* Things develop: a long exponential settle, never a bounce. */
+  --ease-develop: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --t-fast: 160ms;
+  --t-med: 320ms;
+  --t-slow: 900ms;
+
+  /* Chrome sits flat on the print, like an easel blade: a solid body and a hairline, no floating shadow. */
+  --panel-edge: 1px solid var(--dark-line-strong);
+}
