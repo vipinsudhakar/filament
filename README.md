@@ -1,54 +1,77 @@
+<div align="center">
+
 # Filament
 
-A slime mould that draws with light. Millions of agents follow one rule (sense the trail ahead, turn toward the strongest, step, deposit) on a shared field, and glowing networks grow out of it. It runs live in the browser on your GPU through WebGPU, and you can paint into it.
+**A slime mould that draws with light.**
 
-![Filament](public/fallback.jpg)
+Hundreds of thousands of tiny agents follow one simple rule, and living networks grow out of it, live in your browser.
 
-**Live:** https://vipinsudhakar.github.io/physarum/
+### [Open Filament →](https://vipinsudhakar.github.io/physarum/)
 
-## What's in it
+</div>
 
-- **Up to four species**, each with its own sensing and motion, and a 4×4 matrix deciding who follows and who flees whom.
-- **A world you can paint**: food it grows toward and links up, walls, repellent, and lures. Or start from scattered food, a word, or a map of Tokyo with the bay walled off (after Tero et al., *Science* 2010).
-- **A darkroom studio**: tools, a full inspector, presets on a contact sheet, a Mutate button for a random run that's likely to be beautiful, and keyboard shortcuts (`?`).
-- **Share, save, record**: the address bar is always a link that replays the exact run, prints save as PNG, and the canvas records to WebM. Runs can be kept in the browser.
-- **Reproducible**: the same params and seed replay bit-for-bit on the same GPU. A seeded PCG hash is shared line-for-line between TypeScript and WGSL, and deposits are fixed-point atomics so GPU scheduling can't change the result.
+![Filament: the home screen, a live simulation behind the wordmark](docs/images/home.jpg)
 
-## Running it
+## What it is
+
+Filament is a toy and a showpiece built on *Physarum polycephalum*, the slime mould famous for growing efficient networks between food sources. Every agent does the same three things: it **senses** the trail ahead, **turns** toward the strongest scent, and **leaves** a trail of its own. The trails blur and fade, the agents keep reading them, and branching, glowing structures emerge that no single agent ever planned.
+
+Everything runs on your graphics card, in real time.
+
+## The darkroom
+
+![The studio: tools on the left, the inspector on the right, the timer at the bottom](docs/images/studio.jpg)
+
+Open the darkroom and the print is yours to change.
+
+- **Paint into it.** Lay down **food** and it grows toward it and links it up. **Walls** it must route around, **repellent** it refuses to cross, and a **lure** it chases.
+- **Mix up to four species.** Each has its own senses and speed. Decide who follows whom: loyal, chasing, swarming, or keeping apart.
+- **Shape the field.** Set how long trails last, how fast they spread, what happens at the edges, and how many agents there are.
+- **Grow it over something.** Start from scattered food, a word you type, or a map of Tokyo.
+- **Mutate** for a random run that's likely to be beautiful, or pick one of eight presets from the contact sheet.
+
+![The Tokyo preset: the organism grows a network between cities around the bay](docs/images/tokyo.jpg)
+
+*The Tokyo preset recreates a famous 2010 experiment: oat flakes placed where the cities around Tokyo sit, and a slime mould that grew a network strikingly like the real rail system.*
+
+## Keep, share, record
+
+- **Every run is a link.** The address bar always replays your exact run. Copy it and send it.
+- **Save a print** as a PNG, or **record** the canvas to video.
+- **Keep** runs you like. They wait for you on the contact sheet.
+
+### Keys
+
+| Key | Does |
+|---|---|
+| `Space` | Play / pause |
+| `.` | Step one frame |
+| `1`–`5` | Food, Lure, Repel, Wall, Erase |
+| `[` `]` | Smaller / bigger brush |
+| `M` | Mutate |
+| `N` | New seed |
+| `R` | Start over |
+| `P` | Save print |
+| `H` | Hide the controls |
+| `?` | All shortcuts |
+
+## Browser support
+
+Filament needs **WebGPU**: current Chrome, Edge and Safari, and Firefox 141 or newer. On browsers without it you'll see a recording instead.
+
+## Run it locally
 
 ```sh
+git clone https://github.com/vipinsudhakar/physarum.git
+cd physarum
 npm install
-npm run dev          # http://localhost:5173
-npm run check        # typecheck + lint + unit tests
-npm run build
+npm run dev
 ```
 
-It needs a browser with WebGPU (recent Chrome, Edge, Safari 26, Firefox 141+). Browsers without it get a recorded clip instead of a black screen.
-
-### GPU checks
-
-These drive a real browser (Edge by default; set `PW_CHANNEL=chrome` to switch) against the dev server:
-
-| Command | Checks |
-|---|---|
-| `npm run verify -- tokyo` | the canvas actually develops, sampled over time |
-| `npm run determinism` | presets replay bit-for-bit; another seed doesn't |
-| `npm run rng-check` | the WGSL and TypeScript random streams agree |
-| `npm run fallback` | re-records the no-WebGPU clip and poster |
-
-## How it's built
-
-Vite, TypeScript, React 19, and raw WebGPU/WGSL with no 3D library in between. The engine (`src/engine`) knows nothing about React:
-
-- **agents**: one thread per agent senses, turns, moves, and atomically deposits into its species' channel.
-- **diffuse**: blur, decay and food scent over a ping-pong pair of 4-channel trail buffers.
-- **brush**: paints into the world layer over just the brush's bounding box.
-- **render**: an HDR scene, a half-resolution bloom, then an exponential tone map, vignette and dither.
-
-Uniform structs are generated from one TypeScript definition (`src/engine/layout.ts`), so the WGSL and the packer can't drift apart. UI state lives in Zustand, and controls are Radix primitives. Landing-page motion is GSAP and Lenis, driven by the app's single frame loop.
+Then open http://localhost:5173. See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for how it's built, the project layout, and the test tools.
 
 ## Credits
 
-The agent model follows Jeff Jones, *Characteristics of pattern formation and evolution in approximations of Physarum transport networks* (2010). The Tokyo map is after Tero et al., *Rules for biologically inspired adaptive network design* (2010).
+The agent model follows Jeff Jones, *Characteristics of pattern formation and evolution in approximations of Physarum transport networks* (2010). The Tokyo map is after Tero et al., *Rules for biologically inspired adaptive network design*, Science (2010).
 
-MIT licensed. By [Vipin Sudhakar](https://github.com/vipinsudhakar).
+Made by [Vipin Sudhakar](https://github.com/vipinsudhakar). Released under the [MIT License](LICENSE).

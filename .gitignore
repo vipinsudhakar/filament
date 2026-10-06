@@ -14,8 +14,6 @@ playwright-report/
 !.vscode/extensions.json
 *.log
 
-# design-review scratch (screenshots, decision pages); the surface brief stays tracked
-.impeccable/review/
-.impeccable/questions/
-.impeccable/mocks/
-.impeccable/build/
+
+# Local design-tool state; the design record lives in docs/design
+.impeccable/

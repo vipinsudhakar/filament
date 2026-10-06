@@ -22,11 +22,11 @@ export default defineConfig(({ command }) => ({
   base: command === 'build' ? (process.env.BASE_PATH ?? '/physarum/') : '/',
   plugins: [react(), spaFallback()],
   resolve: {
-    // Keep in step with `paths` in tsconfig.app.json.
+    // Keep in step with `paths` in tsconfig.json.
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   test: {
-    include: ['tests/unit/**/*.test.ts'],
+    include: ['tests/**/*.test.ts'],
     environment: 'node',
   },
 }))

@@ -5,18 +5,18 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "typecheck": "tsc -b --noEmit",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
-    "format": "prettier --write .",
+    "format": "prettier --write src tests scripts",
     "test": "vitest run",
     "test:watch": "vitest",
-    "verify": "node tools/verify.mjs",
-    "rng-check": "node tools/rng-check.mjs",
-    "determinism": "node tools/determinism.mjs",
-    "shot": "node tools/shot.mjs",
-    "fallback": "node tools/fallback.mjs",
+    "verify": "node scripts/verify.mjs",
+    "rng-check": "node scripts/rng-check.mjs",
+    "determinism": "node scripts/determinism.mjs",
+    "shot": "node scripts/shot.mjs",
+    "fallback": "node scripts/fallback.mjs",
     "check": "npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
@@ -49,5 +49,11 @@
     "vite": "^8.3.2",
     "vitest": "^5.0.3"
   },
-  "description": "Filament — a WebGPU slime-mould (Physarum) simulation you can paint into."
+  "description": "Filament — a WebGPU slime-mould (Physarum) simulation you can paint into.",
+  "prettier": {
+    "semi": false,
+    "singleQuote": true,
+    "printWidth": 110,
+    "trailingComma": "all"
+  }
 }

@@ -607,7 +607,7 @@ export class Simulation {
 
   /**
    * A hash of the live trail field. Two runs with the same params, seed and grid on the same GPU
-   * must produce the same hash at the same frame — tools/determinism.mjs checks exactly that.
+   * must produce the same hash at the same frame — scripts/determinism.mjs checks exactly that.
    */
   async fieldHash(): Promise<string> {
     const field = this.field

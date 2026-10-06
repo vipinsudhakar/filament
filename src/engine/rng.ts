@@ -9,7 +9,7 @@
  * no u64, and matching a 64-bit generator across TS and the GPU would mean emulating 64-bit
  * multiplies on both sides. The single-word variant is all u32 arithmetic, so `src/engine/shaders/rng.wgsl`
  * is a line-for-line copy and the two produce identical output — which is what the CPU
- * reference vs GPU readback test (tools/determinism.mjs) depends on. Keep the two files in step.
+ * reference vs GPU readback test (scripts/determinism.mjs) depends on. Keep the two files in step.
  */
 
 /**
