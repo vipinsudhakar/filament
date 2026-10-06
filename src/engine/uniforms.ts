@@ -27,6 +27,8 @@ export const SimLayout = defineLayout('SimUniforms', [
   ['brushStrength', 'f32'],
   ['brushTool', 'u32'],
   ['brushActive', 'u32'],
+  // 1 once the run has any food, walls or repellent. With an empty world the agents skip reading it.
+  ['hasWorld', 'u32'],
   // Per species, one vec4 each: (sensorAngle rad, sensorDistance, turnSpeed rad, moveSpeed).
   ['motion', 'vec4f[4]'],
   // Per species: (depositAmount, sensorSize, 0, 0).
@@ -52,6 +54,10 @@ export const LookLayout = defineLayout('LookUniforms', [
   ['foodColor', 'vec4f'],
   ['wallColor', 'vec4f'],
   ['repelColor', 'vec4f'],
+  // Optional exposure per band, for the landing page's test strip: 0 = off, 1 = vertical bands
+  // across x, 2 = horizontal bands down y.
+  ['bandExposure', 'vec4f'],
+  ['bandAxis', 'u32'],
 ] as const)
 
 /** One per blur direction: the separable Gaussian runs once horizontally, once vertically. */
@@ -80,6 +86,7 @@ export type SimRuntime = {
   agentCount: number
   depositScale: number
   brush: Brush | null
+  hasWorld: boolean
 }
 
 /**
@@ -127,6 +134,7 @@ export function simValues(params: Params, runtime: SimRuntime): Parameters<typeo
     brushStrength: brush?.strength ?? 0,
     brushTool: brush ? BRUSH_TOOLS.indexOf(brush.tool) : 0,
     brushActive: brush ? 1 : 0,
+    hasWorld: runtime.hasWorld ? 1 : 0,
     motion,
     senses,
     interaction: params.interaction,
@@ -151,11 +159,13 @@ export type LookRuntime = {
   gridWidth: number
   gridHeight: number
   frame: number
+  bands: { exposure: [number, number, number, number]; axis: 1 | 2 } | null
 }
 
 export function lookValues(params: Params, runtime: LookRuntime): Parameters<typeof LookLayout.pack>[0] {
+  const { bands, ...rest } = runtime
   return {
-    ...runtime,
+    ...rest,
     speciesCount: params.speciesCount,
     exposure: params.look.exposure,
     glow: params.look.glow,
@@ -166,5 +176,7 @@ export function lookValues(params: Params, runtime: LookRuntime): Parameters<typ
     foodColor: vec4('#ffe6a8'),
     wallColor: vec4('#16120f'),
     repelColor: vec4('#ff3b4e'),
+    bandExposure: bands?.exposure ?? [1, 1, 1, 1],
+    bandAxis: bands?.axis ?? 0,
   }
 }

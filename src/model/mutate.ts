@@ -27,7 +27,7 @@ export function mutate(base: Params, seed: number): Params {
       // Turning a bit less than the sensors are spread keeps paths smooth; a bit more makes loops.
       turnSpeed: sensorAngle * r(0.5, 1.3),
       sensorDistance: r(4, 32),
-      sensorSize: pick([0, 1, 1, 2]),
+      sensorSize: pick([0, 0, 0, 1]),
       moveSpeed: r(0.6, 2.2),
       depositAmount: r(0.05, 0.25),
       color:

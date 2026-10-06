@@ -8,6 +8,7 @@ import {
   simValues,
   type Brush,
   type BrushTool,
+  type LookRuntime,
 } from '@/engine/uniforms'
 import { AGENT_BYTES, spawnAgents } from '@/engine/spawn'
 import { WORLD_STRIDE, generateWorld } from '@/engine/world'
@@ -27,9 +28,16 @@ const BRUSH_WORKGROUP = 8
 const CELL_BYTES = 16
 const HDR_FORMAT: GPUTextureFormat = 'rgba16float'
 
-/** The backing store is capped so a 4K display at 2x doesn't render 33M pixels per frame. */
-const MAX_DPR = 2
-const MAX_CANVAS_PIXELS = 6_000_000
+/**
+ * The backing store is capped. The image is a soft, glowing field drawn from a grid at CSS-pixel
+ * resolution, so rendering it at 2x device pixels quadruples the fill work for detail the grid
+ * doesn't have; 1.25x keeps edges crisp on high-DPI screens at a third of the cost.
+ */
+const MAX_DPR = 1.25
+const MAX_CANVAS_PIXELS = 3_500_000
+
+/** Simulation steps run at most this often, whatever the display's refresh rate. */
+const STEP_INTERVAL_MS = 1000 / 60
 
 /** Simulation passes get the generated struct, the RNG and the grid helpers prepended. */
 const simCode = (code: string) => `${SimLayout.wgsl}\n${rngShader}\n${simCommon}\n${code}`
@@ -56,6 +64,8 @@ type Field = {
   world: GPUBuffer
   /** The generated world, kept CPU-side so paint can be cleared back to it and 'food' spawns can read it. */
   baseWorld: Float32Array | null
+  /** Whether the world layer holds anything yet. While it doesn't, the shaders skip reading it. */
+  hasWorld: boolean
   agents: GPUBuffer
   agentCount: number
   depositScale: number
@@ -111,6 +121,11 @@ export class Simulation {
   private frame = 0
 
   private brush: BrushInput | null = null
+  private bands: LookRuntime['bands'] = null
+  /** Time banked toward the next step; steps run at most 60 times a second. */
+  private stepClock = STEP_INTERVAL_MS
+  /** Something visible changed while no step was due, so the next frame must redraw. */
+  private dirty = true
   private lastBrush: { x: number; y: number } | null = null
 
   private fps = 0
@@ -194,6 +209,7 @@ export class Simulation {
    */
   setParams(params: Params): void {
     const restart = needsRestart(this.params, params)
+    this.dirty = true
     this.params = params
     if (restart) this.reset()
     else if (this.field) this.field.depositScale = depositScaleFor(params, this.field.agentCount)
@@ -215,6 +231,8 @@ export class Simulation {
   clearPaint(): void {
     const field = this.field
     if (!field) return
+    this.dirty = true
+    field.hasWorld = field.baseWorld !== null
     if (field.baseWorld) this.device.queue.writeBuffer(field.world, 0, field.baseWorld)
     else
       this.device.queue.writeBuffer(
@@ -255,6 +273,7 @@ export class Simulation {
 
   private allocateField(): void {
     this.destroyField()
+    this.dirty = true
     const { device } = this
     const { width, height } = this.gridSize()
     const cells = width * height
@@ -303,6 +322,7 @@ export class Simulation {
       deposit,
       world,
       baseWorld,
+      hasWorld: baseWorld !== null,
       agents,
       agentCount,
       depositScale: depositScaleFor(this.params, agentCount),
@@ -320,6 +340,7 @@ export class Simulation {
 
   private allocateTargets(width: number, height: number): void {
     this.destroyTargets()
+    this.dirty = true
     const { device } = this
     const texture = (label: string, w: number, h: number) =>
       device.createTexture({
@@ -328,8 +349,9 @@ export class Simulation {
         format: HDR_FORMAT,
         usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.TEXTURE_BINDING,
       })
-    const hw = Math.max(1, Math.round(width / 2))
-    const hh = Math.max(1, Math.round(height / 2))
+    // The glow is soft by nature, so it lives at quarter resolution.
+    const hw = Math.max(1, Math.round(width / 4))
+    const hh = Math.max(1, Math.round(height / 4))
     const scene = texture('scene', width, height)
     const halfA = texture('bloom-a', hw, hh)
     const halfB = texture('bloom-b', hw, hh)
@@ -350,12 +372,13 @@ export class Simulation {
       scene,
       halfA,
       halfB,
-      // `bright` never reads the blur uniforms, so its auto layout has no binding 2.
       brightGroup: device.createBindGroup({
         layout: this.brightPipeline.getBindGroupLayout(0),
         entries: [
           { binding: 0, resource: scene.createView() },
           { binding: 1, resource: this.sampler },
+          // Only for the quarter-res texel size its four-tap downsample needs.
+          { binding: 2, resource: { buffer: this.blurH } },
         ],
       }),
       blurHGroup: blurGroup(halfA, this.blurH),
@@ -382,6 +405,7 @@ export class Simulation {
         agentCount: field.agentCount,
         depositScale: field.depositScale,
         brush,
+        hasWorld: field.hasWorld,
       }),
       this.simStaging,
     )
@@ -396,6 +420,8 @@ export class Simulation {
     const field = this.field
     const input = this.brush
     if (!field || !input) return
+    // Food, walls and repellent put something in the world layer; from now on the shaders read it.
+    if (input.tool === 'food' || input.tool === 'wall' || input.tool === 'repel') field.hasWorld = true
 
     const sx = field.width / Math.max(1, this.canvas.clientWidth)
     const sy = field.height / Math.max(1, this.canvas.clientHeight)
@@ -462,6 +488,7 @@ export class Simulation {
     const field = this.field
     const targets = this.targets
     if (!field || !targets) return
+    this.dirty = false
 
     LookLayout.pack(
       lookValues(this.params, {
@@ -470,6 +497,7 @@ export class Simulation {
         gridWidth: field.width,
         gridHeight: field.height,
         frame: this.frame,
+        bands: this.bands,
       }),
       this.lookStaging,
     )
@@ -477,7 +505,8 @@ export class Simulation {
 
     const hw = targets.halfA.width
     const hh = targets.halfA.height
-    const radius = this.params.look.glowRadius
+    // Half the radius at quarter resolution keeps the same on-screen spread as at half resolution.
+    const radius = this.params.look.glowRadius * 0.5
     this.device.queue.writeBuffer(
       this.blurH,
       0,
@@ -516,9 +545,24 @@ export class Simulation {
     this.device.queue.submit([encoder.finish()])
   }
 
+  /**
+   * Bank frame time toward the next step and say whether one is due. Steps are capped at 60 a
+   * second: on a 120 or 144 Hz display, stepping every refresh would double the GPU work and also
+   * run the organism (and the brush) twice as fast. On a frame with nothing due, the canvas just
+   * keeps showing its last image.
+   */
+  private due(dtMs: number): boolean {
+    // A frame or two of jitter on a 60 Hz display mustn't drop a step, and a long stall (a hidden
+    // tab) mustn't queue up a burst.
+    this.stepClock = Math.min(this.stepClock + dtMs, STEP_INTERVAL_MS * 2)
+    if (this.stepClock < STEP_INTERVAL_MS - 2) return false
+    this.stepClock = Math.max(0, this.stepClock - STEP_INTERVAL_MS)
+    return true
+  }
+
   /** Advance `speed` steps (applying any held brush first) and draw. The frame loop calls this. */
-  tick(): void {
-    if (!this.field || this.destroyed) return
+  tick(dtMs: number = STEP_INTERVAL_MS): void {
+    if (!this.field || this.destroyed || !this.due(dtMs)) return
     this.applyBrush()
     for (let i = 0; i < this.params.speed; i++) this.step()
     this.render()
@@ -527,12 +571,20 @@ export class Simulation {
 
   /**
    * Paused: no steps, but brush strokes still land and the image redraws — so you can lay out food
-   * and walls on a frozen print, change its look, then let it run.
+   * and walls on a frozen print, change its look, then let it run. A frozen print with nothing
+   * changing isn't redrawn at all.
    */
-  frozenTick(): void {
-    if (!this.field || this.destroyed) return
+  frozenTick(dtMs: number = STEP_INTERVAL_MS): void {
+    if (!this.field || this.destroyed || !this.due(dtMs)) return
+    if (!this.brush && !this.dirty) return
     this.applyBrush()
     this.render()
+  }
+
+  /** Exposure per band (the landing page's test strip), or null for none. */
+  setBands(bands: LookRuntime['bands']): void {
+    this.bands = bands
+    this.dirty = true
   }
 
   /** Exactly one step and a draw, regardless of speed — "step while paused". */

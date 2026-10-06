@@ -52,9 +52,8 @@ export function useLandingMotion(root: RefObject<HTMLElement | null>) {
       })
 
       // Leaving the hero: the print sinks back into the dark as the paper rises over it.
-      gsap.to('[data-hero-canvas]', {
-        filter: 'brightness(0.35)',
-        scale: 1.05,
+      gsap.to('[data-hero-shade]', {
+        opacity: 0.65,
         ease: 'none',
         scrollTrigger: { trigger: '[data-hero]', start: 'top top', end: 'bottom top', scrub: true },
       })

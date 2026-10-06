@@ -21,7 +21,14 @@
 .heroCanvas {
   width: 100%;
   height: 100%;
-  transform-origin: 50% 40%;
+}
+
+.heroShade {
+  position: absolute;
+  inset: 0;
+  background: var(--dark-0);
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* The safelight wipe between frames: red light sweeping across the print, multiplied into it. */
@@ -193,7 +200,13 @@
   right: 0;
   bottom: 0;
   height: 52%;
-  background: linear-gradient(to top, rgb(11 9 8 / 90%), rgb(11 9 8 / 62%) 40%, rgb(11 9 8 / 30%) 70%, transparent);
+  background: linear-gradient(
+    to top,
+    rgb(11 9 8 / 90%),
+    rgb(11 9 8 / 62%) 40%,
+    rgb(11 9 8 / 30%) 70%,
+    transparent
+  );
   pointer-events: none;
 }
 
@@ -324,20 +337,11 @@
   text-wrap: pretty;
 }
 
-.strips {
-  display: grid;
-  gap: var(--s-6);
-}
-
 /* A strip of film: black base, sprocket rows above and below, four frames between. */
 .strip {
   background: var(--paper-ink);
   padding: 0 var(--s-3);
   box-shadow: 0 18px 36px -24px rgb(23 17 13 / 70%);
-}
-
-.strip:nth-child(2) {
-  transform: translateX(clamp(8px, 2vw, 32px)) rotate(-0.35deg);
 }
 
 .sprockets {
@@ -376,6 +380,7 @@
 }
 
 .frameImage {
+  position: relative;
   display: block;
   width: 100%;
   aspect-ratio: 3 / 2;
@@ -383,14 +388,27 @@
   border-radius: 2px;
 }
 
-.frameCanvas {
+/* The still print. */
+.framePrint {
   width: 100%;
   height: 100%;
-  transition: transform var(--t-slow) var(--ease-develop);
+  object-fit: cover;
 }
 
-.frame:hover .frameCanvas {
-  transform: scale(1.04);
+.frameDeveloping {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--paper-ink);
+}
+
+/* The live run, laid over its print and faded in once it has caught up with it. */
+.frameCanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity 500ms var(--ease-out);
 }
 
 /* ─── Test strip ───────────────────────────────────────────────────────────── */
@@ -435,14 +453,14 @@
   grid-template-columns: repeat(4, 1fr);
 }
 
-/* Each band is a different exposure of the same print — the darkroom's way of choosing a time. */
+/* Each band is a different exposure of the same print, the darkroom way of choosing a time. The
+   exposure itself is applied in the shader (see TestStrip); the band is just its frame and label. */
 .band {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: var(--s-4);
-  backdrop-filter: brightness(var(--exposure, 1)) contrast(1.08);
   border-left: 1px solid rgb(235 228 212 / 22%);
 }
 
@@ -604,9 +622,6 @@
   }
   .testStrip {
     height: 640px;
-  }
-  .strip:nth-child(2) {
-    transform: none;
   }
 }
 

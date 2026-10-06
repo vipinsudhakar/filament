@@ -1,8 +1,7 @@
 // Bloom, in two entry points sharing one module.
 //
-// `bright` downsamples the scene to half resolution keeping only what's bright enough to glow.
-// Sampling at a half-res texel centre lands between four full-res texels, so the linear sampler
-// averages them for free.
+// `bright` downsamples the scene to quarter resolution, keeping only what's bright enough to glow.
+// It reads the blur uniforms only for the quarter-res texel size.
 //
 // `blur` is a separable 9-tap Gaussian, run horizontally then vertically. The taps sit between
 // texels so the linear sampler folds two weights into each fetch: 5 fetches for 9 taps.
@@ -13,7 +12,16 @@
 
 @fragment
 fn bright(in: VertexOut) -> @location(0) vec4f {
-  let c = textureSampleLevel(src, samp, in.uv, 0.0).rgb;
+  // The glow runs at quarter resolution, so each output texel covers 4x4 scene pixels. Four
+  // bilinear taps, one per 2x2 quadrant, average all sixteen; a single tap would skip filaments
+  // thinner than four pixels and make the glow shimmer as they move.
+  let o = vec2f(b.texelX, b.texelY) * 0.25;
+  let c = 0.25 * (
+    textureSampleLevel(src, samp, in.uv + vec2f(-o.x, -o.y), 0.0).rgb +
+    textureSampleLevel(src, samp, in.uv + vec2f(o.x, -o.y), 0.0).rgb +
+    textureSampleLevel(src, samp, in.uv + vec2f(-o.x, o.y), 0.0).rgb +
+    textureSampleLevel(src, samp, in.uv + vec2f(o.x, o.y), 0.0).rgb
+  );
   // Soft knee: faint filaments contribute a little, the trunks most.
   let luma = dot(c, vec3f(0.2126, 0.7152, 0.0722));
   return vec4f(c * smoothstep(0.05, 0.6, luma), 1.0);

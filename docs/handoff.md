@@ -39,3 +39,18 @@ Done:
 
 - Never add AI attribution to commits, PRs or docs.
 - Ask before every push. Making this history the new `main` needs a force push; push the `legacy-v0` tag first.
+
+## Performance (2026-10-06)
+
+Measured on an integrated Intel Xe-LPG GPU at 1440×900 @2x with `tools/perf.mjs` (frame rate per scroll stop) and per-pass GPU timing.
+
+- **Hero step (the bottleneck):** 39 ms → 9 ms.
+  - Sensing reads a single cell by default (`sensorSize` 0). The 3×3 patch looked nearly identical and cost 2.5×.
+  - Agents and diffuse skip the world layer while it's empty (`hasWorld`). That halved the reads.
+- **Render:** about 5 ms. Pixel density is capped at 1.25×, and the glow runs at quarter resolution with a 4-tap downsample.
+- **Steps:** capped at 60/s whatever the refresh rate. Frozen prints only redraw when something changes.
+- **Landing:** never more than one live sim on screen.
+  - The contact sheet is 4 still prints (`src/features/prints.ts`); hovering one plays it live, pre-stepped to match the print.
+  - The test-strip exposure is applied in the composite shader rather than with a CSS `backdrop-filter`.
+  - The hero's scroll darkening is an overlay, not a canvas filter.
+- **Measuring:** a laptop on battery caps every page at 30 fps (even a blank one). Use GPU timings for comparisons, not page fps.

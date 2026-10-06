@@ -111,7 +111,13 @@ export const SPECIES_BOUNDS: Record<SpeciesNumericKey, Bound> = {
     unit: 'px',
     hint: 'How far ahead each agent smells',
   },
-  sensorSize: { min: 0, max: 3, step: 1, label: 'Sensor size', hint: 'Radius each sensor averages over' },
+  sensorSize: {
+    min: 0,
+    max: 3,
+    step: 1,
+    label: 'Sensor size',
+    hint: 'Radius each sensor averages over. Bigger is smoother but much slower.',
+  },
   turnSpeed: {
     min: 1,
     max: 120,
@@ -185,7 +191,9 @@ export const SPECIES_COLORS = ['#f2b45a', '#e8e0cf', '#d4513a', '#6b9ec4']
 export const DEFAULT_SPECIES: Species = {
   sensorAngle: 25,
   sensorDistance: 12,
-  sensorSize: 1,
+  // A single cell: the field is already blurred every step, so averaging a patch around each
+  // sensor looks nearly identical and costs 2.5x the step time on integrated GPUs.
+  sensorSize: 0,
   turnSpeed: 28,
   moveSpeed: 1.1,
   depositAmount: 0.12,

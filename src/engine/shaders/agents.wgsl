@@ -31,8 +31,13 @@ fn sense(pos: vec2f, heading: f32, s: u32) -> f32 {
   for (var dy = -r; dy <= r; dy++) {
     for (var dx = -r; dx <= r; dx++) {
       let i = cell_at(cx + dx, cy + dy);
-      let w = world[i];
-      sum += dot(trail[i], weights) - w.z * u.repelStrength - w.y * 1000.0;
+      var reading = dot(trail[i], weights);
+      // Most runs have an empty world; skipping its read halves the memory traffic per sensor.
+      if (u.hasWorld != 0u) {
+        let w = world[i];
+        reading -= w.z * u.repelStrength + w.y * 1000.0;
+      }
+      sum += reading;
     }
   }
   return sum / f32((2 * r + 1) * (2 * r + 1));
@@ -88,7 +93,7 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
   }
 
   var cell = u32(p.y) * u.width + u32(p.x);
-  if (world[cell].y > 0.5) {
+  if (u.hasWorld != 0u && world[cell].y > 0.5) {
     // Walked into a wall: stay put and pick a fresh heading, the way the real organism probes.
     p = agent.pos;
     heading = agent_random(i, 0x1b873593u) * TAU;

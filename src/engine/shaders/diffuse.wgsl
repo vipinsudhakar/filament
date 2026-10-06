@@ -35,7 +35,11 @@ fn main(@builtin(global_invocation_id) id: vec3u) {
     f32(atomicLoad(&deposit[d + 3u])),
   ) / u.depositScale;
 
-  let w = world[i];
+  // An empty world contributes nothing; skip the read.
+  var w = vec4f(0.0);
+  if (u.hasWorld != 0u) {
+    w = world[i];
+  }
   let blurred = mix(src[i] + deposited, mean, u.diffuseRate);
   var next = blurred * u.decayRate + vec4f(w.x * u.foodEmit) * species_mask();
   // Walls soak up trail so nothing glows through them.

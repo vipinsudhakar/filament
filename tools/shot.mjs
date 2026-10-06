@@ -39,8 +39,9 @@ page.on(
 page.on('pageerror', (e) => logs.push(`pageerror: ${e}`))
 
 // Git Bash rewrites a bare "/" argument into a Windows path, so the leading slash is optional.
+const base = process.env.BASE_URL ?? "http://localhost:5173"
 const route = /^[A-Za-z]:[/]/.test(path) ? '/' : `/${path.replace(/^\/+/, '')}`
-await page.goto(`http://localhost:5173${route}`, { waitUntil: 'networkidle' })
+await page.goto(`${base}${route}`, { waitUntil: 'networkidle' })
 await page.waitForTimeout(wait)
 
 // --scroll 900,2400,3600 : wheel down to each offset in turn (so smooth scroll and scroll-driven

@@ -28,6 +28,14 @@ fn fs(in: VertexOut) -> @location(0) vec4f {
 
   // Linear -> sRGB, then a sub-LSB dither so dark gradients don't band in 8 bits.
   var srgb = pow(max(col, vec3f(0.0)), vec3f(1.0 / 2.2));
+
+  // Test-strip bands: the same print at four exposures, done here rather than with CSS filters over
+  // the canvas, which would make the compositor re-filter it every frame. Applied after encoding,
+  // the way CSS brightness() is, so the steps read as clearly as the design intends.
+  if (r.bandAxis != 0u) {
+    let t = select(in.uv.y, in.uv.x, r.bandAxis == 1u);
+    srgb *= r.bandExposure[min(3u, u32(floor(t * 4.0)))];
+  }
   srgb += (dither(vec2u(in.pos.xy)) - 0.5) / 255.0;
   return vec4f(srgb, 1.0);
 }

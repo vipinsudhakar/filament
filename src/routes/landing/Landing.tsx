@@ -7,6 +7,7 @@ import type { Simulation } from '@/engine/Simulation'
 import { frameLoop } from '@/engine/frameLoop'
 import { useSimulation } from '@/hooks/useSimulation'
 import { LiveFrame } from '@/features/LiveFrame'
+import { PRINT_STEPS, usePresetPrints } from '@/features/prints'
 import { Mark } from '@/ui/Mark'
 import { Unsupported } from '@/routes/shell/Unsupported'
 import { prefersReducedMotion, useLandingMotion } from './motion'
@@ -110,6 +111,9 @@ function Hero() {
           aria-label={`Live simulation: ${preset.name}`}
         />
       </div>
+      {/* Darkens the print on scroll. A plain overlay, not a filter on the canvas: filtering a live
+          WebGPU canvas makes the compositor re-process every frame at full resolution. */}
+      <div className={styles.heroShade} data-hero-shade aria-hidden="true" />
       <div key={wipe} className={styles.wipe} data-active={wipe > 0 || undefined} aria-hidden="true" />
 
       <header className={styles.rebate} data-hero-ui>
@@ -172,48 +176,80 @@ function Hero() {
 
 /* ─── Contact sheet: every preset, live, on strips of film laid on paper ───────────────────── */
 
+/** Four frames, chosen to differ: one radiating, one network, one cellular, one lettered. */
+const SHEET = ['bloom', 'tokyo', 'cells', 'signal']
+
+/**
+ * The contact sheet is prints, not live runs: they're developed once in the background and then
+ * cost nothing. Only the frame under the pointer comes alive, so the section never runs more than
+ * one simulation. The prints develop when the sheet is nearly in view, not at page load, so they
+ * never compete with the hero.
+ */
 function ContactSheet() {
-  const rows = [PRESETS.slice(0, 4), PRESETS.slice(4, 8)]
+  const ref = useRef<HTMLElement>(null)
+  const [near, setNear] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const io = new IntersectionObserver(([e]) => e.isIntersecting && setNear(true), {
+      rootMargin: '600px 0px',
+    })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [])
+  const prints = usePresetPrints(SHEET, near)
+
   return (
-    <section className={styles.sheet} aria-labelledby="sheet-title">
+    <section ref={ref} className={styles.sheet} aria-labelledby="sheet-title">
       <div className={styles.sheetHead}>
         <h2 id="sheet-title" className={styles.sheetTitle} data-sheet-title>
           <span>Contact</span> <span>sheet</span>
         </h2>
         <p className={styles.sheetNote}>
-          Every frame is running. Pick one and it opens in the darkroom, yours to change.
+          Hold over a frame and it comes alive. Pick one and it opens in the darkroom, yours to change.
         </p>
       </div>
-      <div className={styles.strips}>
-        {rows.map((row, r) => (
-          <div key={r} className={styles.strip} data-strip>
-            <div className={styles.sprockets} aria-hidden="true" />
-            <ol className={styles.frames}>
-              {row.map((p, i) => (
-                <li key={p.id}>
-                  <SheetFrame id={p.id} seed={r * 4 + i} />
-                </li>
-              ))}
-            </ol>
-            <div className={styles.sprockets} aria-hidden="true" />
-          </div>
-        ))}
+      <div className={styles.strip} data-strip>
+        <div className={styles.sprockets} aria-hidden="true" />
+        <ol className={styles.frames}>
+          {SHEET.map((id, i) => (
+            <li key={id}>
+              <SheetFrame id={id} seed={i} print={prints.get(id)} />
+            </li>
+          ))}
+        </ol>
+        <div className={styles.sprockets} aria-hidden="true" />
       </div>
     </section>
   )
 }
 
-function SheetFrame({ id, seed }: { id: string; seed: number }) {
+function SheetFrame({ id, seed, print }: { id: string; seed: number; print?: string }) {
   const preset = presetById(id)!
   const [hover, setHover] = useState(false)
+  const [live, setLive] = useState(false)
+
+  // Bring the live run up to where the print was developed before showing it, so hovering
+  // continues the image instead of restarting it from noise.
+  const warmUp = useCallback(
+    (sim: Simulation | null) => {
+      if (!sim) return setLive(false)
+      sim.setParams({ ...preset.params, speed: 8 })
+      for (let i = 0; i < PRINT_STEPS / 8; i++) sim.tick()
+      sim.setParams(preset.params)
+      setLive(true)
+    },
+    [preset.params],
+  )
+
   return (
     <Link
       to={`/studio?preset=${id}`}
       className={styles.frame}
       onPointerEnter={() => setHover(true)}
-      onPointerLeave={() => setHover(false)}
+      onPointerLeave={() => (setHover(false), setLive(false))}
       onFocus={() => setHover(true)}
-      onBlur={() => setHover(false)}
+      onBlur={() => (setHover(false), setLive(false))}
     >
       <span className={styles.frameEdge}>
         <span>{preset.code}</span>
@@ -221,7 +257,20 @@ function SheetFrame({ id, seed }: { id: string; seed: number }) {
       </span>
       <Mark active={hover} seed={seed + 80} className={styles.frameMark}>
         <span className={styles.frameImage} data-develop>
-          <LiveFrame params={preset.params} className={styles.frameCanvas} label={preset.name} />
+          {print ? (
+            <img src={print} alt={preset.name} className={styles.framePrint} />
+          ) : (
+            <span className={styles.frameDeveloping} />
+          )}
+          {hover && (
+            <LiveFrame
+              params={preset.params}
+              className={styles.frameCanvas}
+              style={{ opacity: live ? 1 : 0 }}
+              onSim={warmUp}
+              label={`${preset.name}, live`}
+            />
+          )}
         </span>
       </Mark>
     </Link>
@@ -242,16 +291,44 @@ const TEST_PARAMS = (() => {
   return { ...web, look: { ...web.look, exposure: 1.1, glow: 0.5 } }
 })()
 
+/**
+ * The bands are exposed in the shader, not with CSS filters over the canvas: a backdrop-filter
+ * over a live canvas makes the compositor re-filter it every frame. The scroll timeline in motion.ts
+ * still animates each band's --exposure; this just hands those values to the shader each frame.
+ */
 function TestStrip() {
   const reduced = prefersReducedMotion()
+  const [sim, setSim] = useState<Simulation | null>(null)
+  const bandsRef = useRef<HTMLOListElement>(null)
+
+  useEffect(() => {
+    const list = bandsRef.current
+    if (!sim || !list) return
+    const stacked = window.matchMedia('(max-width: 640px)')
+    const bands = Array.from(list.children) as HTMLElement[]
+    let last = ''
+    return frameLoop.add(() => {
+      const values = bands.map((b) => Number(b.style.getPropertyValue('--exposure')) || 1)
+      const key = values.join() + stacked.matches
+      if (key === last) return
+      last = key
+      sim.setBands({ exposure: values as [number, number, number, number], axis: stacked.matches ? 2 : 1 })
+    })
+  }, [sim])
+
   return (
     <section className={styles.test} aria-labelledby="test-title">
       <h2 id="test-title" className={styles.testTitle}>
         One rule, every agent, every frame.
       </h2>
       <div className={styles.testStrip} data-teststrip>
-        <LiveFrame params={TEST_PARAMS} className={styles.testCanvas} label="Live simulation" />
-        <ol className={styles.bands}>
+        <LiveFrame
+          params={TEST_PARAMS}
+          className={styles.testCanvas}
+          onSim={setSim}
+          label="Live simulation"
+        />
+        <ol ref={bandsRef} className={styles.bands}>
           {STEPS.map((s) => (
             <li
               key={s.word}

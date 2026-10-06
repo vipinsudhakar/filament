@@ -63,10 +63,10 @@ export function useSimulation(
         return
       }
       const sim = instance
-      unsubscribe = frameLoop.add(() => {
+      unsubscribe = frameLoop.add((_time, dt) => {
         const m = mode?.current ?? 'run'
-        if (m === 'run') sim.tick()
-        else if (m === 'frozen') sim.frozenTick()
+        if (m === 'run') sim.tick(dt)
+        else if (m === 'frozen') sim.frozenTick(dt)
       })
       frameLoop.start()
       setSim(sim)
