@@ -5,7 +5,7 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 
 /**
- * GitHub Pages has no SPA fallback: a hard refresh on /physarum/studio is a 404. Serving the app
+ * GitHub Pages has no SPA fallback: a hard refresh on /filament/studio is a 404. Serving the app
  * shell as 404.html makes Pages hand every unknown path to the router instead.
  */
 const spaFallback = (): Plugin => ({
@@ -18,8 +18,8 @@ const spaFallback = (): Plugin => ({
 })
 
 export default defineConfig(({ command }) => ({
-  // Pages serves the site from /physarum/; the dev server stays at the root.
-  base: command === 'build' ? (process.env.BASE_PATH ?? '/physarum/') : '/',
+  // Pages serves the site from /filament/; the dev server stays at the root.
+  base: command === 'build' ? (process.env.BASE_PATH ?? '/filament/') : '/',
   plugins: [react(), spaFallback()],
   resolve: {
     // Keep in step with `paths` in tsconfig.json.

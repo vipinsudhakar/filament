@@ -13,7 +13,7 @@ import { Unsupported } from '@/pages/unsupported/Unsupported'
 import { prefersReducedMotion, useLandingMotion } from './motion'
 import styles from './Home.module.css'
 
-const REPO = 'https://github.com/vipinsudhakar/physarum'
+const REPO = 'https://github.com/vipinsudhakar/filament'
 const CYCLE_MS = 9000
 const WIPE_MS = 1100
 
@@ -447,7 +447,7 @@ function Close() {
         <span>Filament</span>
         <a href={REPO} target="_blank" rel="noreferrer">
           <GithubMark size={14} />
-          vipinsudhakar/physarum
+          vipinsudhakar/filament
         </a>
         <span>After Jones (2010) and Tero et al. (2010)</span>
       </footer>

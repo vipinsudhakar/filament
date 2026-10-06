@@ -38,7 +38,7 @@ A real-time, GPU-native multi-species Physarum you can paint into: food, walls, 
 
 ## Brand Commitments
 
-- Name: **Filament**. The repo is still named `physarum`.
+- Name: **Filament**, used everywhere, including the repo and the URL.
 - Voice: minimal, almost no copy. Labels and a few lines; the organism does the talking.
 - Must link to the author's GitHub (`vipinsudhakar`) and the repo.
 

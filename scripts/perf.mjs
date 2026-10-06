@@ -5,7 +5,7 @@
  *
  * Usage:  node scripts/perf.mjs [url] [--stops 0,1000,2000] [--dpr 2] [--size 1440x900]
  *   e.g.  node scripts/perf.mjs http://localhost:5173/
- *         node scripts/perf.mjs https://vipinsudhakar.github.io/physarum/
+ *         node scripts/perf.mjs https://vipinsudhakar.github.io/filament/
  */
 import { chromium } from '@playwright/test'
 

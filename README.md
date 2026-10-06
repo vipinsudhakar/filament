@@ -6,7 +6,7 @@
 
 Hundreds of thousands of tiny agents follow one simple rule, and living networks grow out of it, live in your browser.
 
-### [Open Filament →](https://vipinsudhakar.github.io/physarum/)
+### [Open Filament →](https://vipinsudhakar.github.io/filament/)
 
 </div>
 
@@ -62,8 +62,8 @@ Filament needs **WebGPU**: current Chrome, Edge and Safari, and Firefox 141 or n
 ## Run it locally
 
 ```sh
-git clone https://github.com/vipinsudhakar/physarum.git
-cd physarum
+git clone https://github.com/vipinsudhakar/filament.git
+cd filament
 npm install
 npm run dev
 ```
